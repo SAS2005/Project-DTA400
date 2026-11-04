@@ -4,7 +4,8 @@
 **University:** University West (*Högskolan Väst*), Sweden  
 **Course:** DTA400 – Network Simulation (Autumn 2026)  
 **Project Members:** Shucayb Said & Firat Kaya  
-**Technology Stack:** Python 3, SimPy 4, NumPy, Pandas, Matplotlib, Pytest
+**Technology Stack:** Python 3, SimPy 4.1.2, NumPy, Pandas, Matplotlib, Pytest  
+**GitHub Repository:** [https://github.com/SAS2005/Project-DTA400](https://github.com/SAS2005/Project-DTA400)
 
 ---
 
@@ -222,3 +223,46 @@ Using identical seeds and cloned workloads across strategies, paired seed-by-see
 2. **In-Place Live Vertical Resizing:** Vertical upgrades apply after a $5.0\text{ s}$ delay without rebooting or dropping an in-flight request. Legacy VM environments requiring full OS reboots for vertical resizing would experience downtime and higher tail latency.
 3. **Idealized Linear Speedup and Cost:** Both service rate ($W/c$) and active cost rate scale linearly with $c \in \{1, 2, 4\}$. Sub-linear multi-core speedup ($t_s > W/c$ at $c=4$) would reduce the latency advantage of `vertical` ($1\times 4$) relative to `hybrid` ($2\times 2$).
 4. **Synthetic Piecewise-Poisson Workloads:** Workloads are generated via a seeded piecewise-constant Poisson process for exact repeatability. Google Cluster Workload Traces are discussed in the report background as cluster utilization context rather than direct HTTP web request logs.
+
+---
+
+## 11. Generated Figures and Project Structure
+
+All 10 figures in `figures/` are generated deterministically from the CSV datasets in `results/`:
+
+- `figures/fig01_workload_over_time.png` — Request arrival rate and empirical throughput over time (`variable_baseline`).
+- `figures/fig02_avg_response_time_by_strategy.png` — Mean response time across strategies ($N=10$ seeds, $\pm 95\%$ CI).
+- `figures/fig03_p95_response_time_by_strategy.png` — 95th-percentile (P95) response time against default ($1.0\text{ s}$) and strict ($0.35\text{ s}$) SLO thresholds.
+- `figures/fig04_total_cost_by_strategy.png` — Normalized operating cost breakdown (active, provisioning, standby).
+- `figures/fig05_active_servers_over_time.png` — Active instance count trajectories over time.
+- `figures/fig06_available_capacity_over_time.png` — Total active processing capacity trajectories vs. workload demand.
+- `figures/fig07_queue_length_over_time.png` — FIFO waiting queue length trajectories during traffic surges.
+- `figures/fig08_cost_vs_response_time_tradeoff.png` — Cost vs. P95 latency Pareto trade-off frontier.
+- `figures/fig09_cold_start_impact.png` — Provisioning startup delay sensitivity ($0\text{–}30\text{ s}$) on `variable_baseline` and `sudden_spike`.
+- `figures/fig10_standby_and_shutdown_sensitivity.png` — Warm standby mitigation and shutdown observation window sensitivity ($30\text{–}120\text{ s}$) on `recurring_spikes`.
+
+### Repository Layout
+```text
+Project-DTA400/
+├── config.py                # Simulation parameters, request classes, cost rates, and scenario definitions
+├── workload.py              # Seeded non-homogeneous Poisson workload generator & Common Random Numbers cloning
+├── server.py                # FIFO RequestQueue, ServerInstance state machine, and ServerPool
+├── scaling.py               # Static baselines and Vertical, Horizontal, Hybrid, & Adaptive Hybrid autoscalers
+├── metrics.py               # Continuous-time capacity/cost integrator and SLO evaluator
+├── experiments.py           # Multi-seed experiment runner (Experiments 1–5) and paired statistical tests
+├── plots.py                 # Matplotlib figure generator (fig01–fig10)
+├── main.py                  # CLI entry point (--mode baseline | experiments | plots | all)
+├── requirements.txt         # Pinned Python dependencies
+├── pytest.ini               # Pytest configuration
+├── tests/                   # 27 automated unit and integration tests
+├── results/                 # Verified CSV datasets from Experiments 1–5 (N=10 seeds)
+├── figures/                 # 10 publication-quality figures (300 DPI PNG)
+└── report/                  # IEEE conference paper (.md, .docx, .pdf), outline, and presentation guide
+```
+
+---
+
+## 12. Reproducibility and Repository Link
+
+- **Deterministic Reproducibility:** All stochastic experiments use explicit seed sequences (`42..51`) and Common Random Numbers (`clone_workload`), guaranteeing that re-running `python main.py --mode all --num-seeds 10` reproduces all CSV datasets in `results/` and figures in `figures/`.
+- **Public GitHub Repository:** [https://github.com/SAS2005/Project-DTA400](https://github.com/SAS2005/Project-DTA400) (`https://github.com/SAS2005/Project-DTA400.git`)

@@ -17,5 +17,7 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Local archive
-Project-DTA400.zip
+# Local archives and temporary verification packages
+*.zip
+simpy_wheels/
+test_results.txt
