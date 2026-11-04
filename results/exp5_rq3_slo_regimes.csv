@@ -1,0 +1,19 @@
+scenario_name,slo_p95_threshold_s,lowest_cost_compliant_strategy,lowest_cost_units,strict_100pct_compliant_strategies,lowest_cost_mean_p95_strategy,lowest_cost_mean_p95_units,mean_winner_pass_count,mean_winner_pass_rate,mean_p95_feasible_strategies
+variable_baseline,0.25,none (no strategy meets SLO in 100% of runs),,none,none (no strategy meets mean P95),,0,0.0,none
+variable_baseline,0.3,none (no strategy meets SLO in 100% of runs),,none,none (no strategy meets mean P95),,0,0.0,none
+variable_baseline,0.35,hybrid,2.1159872120481973,"vertical (10/10), hybrid (10/10)",hybrid_adaptive,2.0109885557065548,8,0.8,"vertical (10/10), hybrid (10/10), hybrid_adaptive (8/10)"
+variable_baseline,0.4,hybrid_adaptive,2.0109885557065548,"vertical (10/10), hybrid (10/10), hybrid_adaptive (10/10)",horizontal,1.978908668118602,9,0.9,"vertical (10/10), horizontal (9/10), hybrid (10/10), hybrid_adaptive (10/10)"
+variable_baseline,0.5,horizontal,1.978908668118602,"vertical (10/10), horizontal (10/10), hybrid (10/10), hybrid_adaptive (10/10)",horizontal,1.978908668118602,10,1.0,"vertical (10/10), horizontal (10/10), hybrid (10/10), hybrid_adaptive (10/10)"
+variable_baseline,1.0,horizontal,1.978908668118602,"vertical (10/10), horizontal (10/10), hybrid (10/10), hybrid_adaptive (10/10)",horizontal,1.978908668118602,10,1.0,"vertical (10/10), horizontal (10/10), hybrid (10/10), hybrid_adaptive (10/10)"
+sudden_spike,0.25,none (no strategy meets SLO in 100% of runs),,none,none (no strategy meets mean P95),,0,0.0,none
+sudden_spike,0.3,none (no strategy meets SLO in 100% of runs),,none,none (no strategy meets mean P95),,0,0.0,none
+sudden_spike,0.35,none (no strategy meets SLO in 100% of runs),,none,none (no strategy meets mean P95),,0,0.0,none
+sudden_spike,0.4,vertical,1.8221061611235787,vertical (10/10),hybrid,1.8184966704092034,9,0.9,"vertical (10/10), hybrid (9/10), hybrid_adaptive (9/10)"
+sudden_spike,0.5,hybrid,1.8184966704092034,"vertical (10/10), hybrid (10/10), hybrid_adaptive (10/10)",hybrid,1.8184966704092034,10,1.0,"vertical (10/10), horizontal (7/10), hybrid (10/10), hybrid_adaptive (10/10)"
+sudden_spike,1.0,hybrid,1.8184966704092034,"vertical (10/10), horizontal (10/10), hybrid (10/10), hybrid_adaptive (10/10)",hybrid,1.8184966704092034,10,1.0,"vertical (10/10), horizontal (10/10), hybrid (10/10), hybrid_adaptive (10/10)"
+recurring_spikes,0.25,none (no strategy meets SLO in 100% of runs),,none,none (no strategy meets mean P95),,0,0.0,none
+recurring_spikes,0.3,none (no strategy meets SLO in 100% of runs),,none,none (no strategy meets mean P95),,0,0.0,none
+recurring_spikes,0.35,none (no strategy meets SLO in 100% of runs),,none,none (no strategy meets mean P95),,0,0.0,none
+recurring_spikes,0.4,hybrid_adaptive,2.469084709563943,hybrid_adaptive (10/10),vertical,2.435596864236827,8,0.8,"vertical (8/10), hybrid_adaptive (10/10)"
+recurring_spikes,0.5,horizontal,2.427113015743963,"vertical (10/10), horizontal (10/10), hybrid_adaptive (10/10)",horizontal,2.427113015743963,10,1.0,"vertical (10/10), horizontal (10/10), hybrid_adaptive (10/10)"
+recurring_spikes,1.0,horizontal,2.427113015743963,"vertical (10/10), horizontal (10/10), hybrid (10/10), hybrid_adaptive (10/10)",horizontal,2.427113015743963,10,1.0,"vertical (10/10), horizontal (10/10), hybrid (10/10), hybrid_adaptive (10/10)"
