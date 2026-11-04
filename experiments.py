@@ -124,6 +124,64 @@ def aggregate_runs(
     return pd.DataFrame(records)
 
 
+def compute_paired_comparisons(df_runs: pd.DataFrame) -> pd.DataFrame:
+    """Compute paired seed-by-seed differences and 95% confidence intervals across strategies."""
+    pairs = [
+        ("horizontal", "vertical"),
+        ("horizontal", "hybrid"),
+        ("horizontal", "hybrid_adaptive"),
+        ("hybrid", "vertical"),
+        ("hybrid_adaptive", "hybrid"),
+        ("hybrid_adaptive", "vertical"),
+    ]
+    metrics = ["total_cost", "p95_response_time_s", "avg_response_time_s"]
+    rows: List[Dict[str, object]] = []
+
+    for scen, scen_df in df_runs.groupby("scenario_name", sort=False):
+        for strat_a, strat_b in pairs:
+            sub_a = scen_df[scen_df["strategy"] == strat_a].sort_values("seed")
+            sub_b = scen_df[scen_df["strategy"] == strat_b].sort_values("seed")
+            if len(sub_a) == 0 or len(sub_a) != len(sub_b):
+                continue
+            if not np.array_equal(sub_a["seed"].to_numpy(), sub_b["seed"].to_numpy()):
+                continue
+
+            n = len(sub_a)
+            t_crit = 2.2621571627409915 if n == 10 else (2.776 if n == 5 else 1.960)
+            for m in metrics:
+                va = sub_a[m].to_numpy(dtype=float)
+                vb = sub_b[m].to_numpy(dtype=float)
+                diff = va - vb
+                mean_a = float(np.mean(va))
+                mean_b = float(np.mean(vb))
+                mean_d = float(np.mean(diff))
+                std_d = float(np.std(diff, ddof=1)) if n > 1 else 0.0
+                ci_half = float(t_crit * std_d / np.sqrt(n)) if n > 1 else 0.0
+                ci_lo = mean_d - ci_half
+                ci_hi = mean_d + ci_half
+                rel_pct = (100.0 * mean_d / mean_b) if abs(mean_b) > 1e-12 else 0.0
+                inc_zero = bool(ci_lo <= 0.0 <= ci_hi)
+                rows.append(
+                    {
+                        "scenario_name": scen,
+                        "strategy_a": strat_a,
+                        "strategy_b": strat_b,
+                        "metric": m,
+                        "n_seeds": n,
+                        "strategy_a_mean": mean_a,
+                        "strategy_b_mean": mean_b,
+                        "mean_paired_diff": mean_d,
+                        "std_paired_diff": std_d,
+                        "ci95_halfwidth": ci_half,
+                        "ci95_low": ci_lo,
+                        "ci95_high": ci_hi,
+                        "rel_diff_pct": rel_pct,
+                        "ci95_includes_zero": inc_zero,
+                        "statistically_significant_95pct": not inc_zero,
+                    }
+                )
+    return pd.DataFrame(rows)
+
 
 def run_experiment_1_strategy_comparison(
     seeds: Sequence[int] = DEFAULT_SEEDS,

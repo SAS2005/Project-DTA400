@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from config import SimulationConfig, TRAFFIC_SCENARIOS, TrafficSegment
-from experiments import aggregate_runs
+from experiments import aggregate_runs, compute_paired_comparisons
 from scaling import run_simulation
 from workload import generate_workload
 
@@ -66,4 +66,44 @@ def test_paired_shared_workload_conservation_of_requests() -> None:
         summaries["horizontal"].avg_response_time_s, abs=1e-4
     )
 
+
+def test_per_run_slo_compliance_and_paired_difference_calculation() -> None:
+    """Aggregation and paired statistics must track per-seed compliance and 95% CIs accurately."""
+    import pandas as pd
+
+    profile = (
+        TrafficSegment(0.0, 120.0, 6.0, "Normal"),
+        TrafficSegment(120.0, 240.0, 18.0, "Spike"),
+    )
+    rows = []
+    for seed in (42, 43, 44):
+        wl = generate_workload(traffic_profile=profile, seed=seed)
+        for strat in ("vertical", "horizontal", "hybrid", "hybrid_adaptive"):
+            cfg = SimulationConfig(
+                strategy=strat,
+                scenario_name="mini_spike",
+                traffic_profile=profile,
+                simulation_duration=240.0,
+                random_seed=seed,
+            )
+            res = run_simulation(cfg, pregenerated_requests=wl)
+            rows.append(res.summary.to_dict())
+
+    df_runs = pd.DataFrame(rows)
+    df_sum = aggregate_runs(df_runs, group_cols=["scenario_name", "strategy"])
+    assert "slo_pass_count" in df_sum.columns
+    assert "slo_035_pass_count" in df_sum.columns
+    assert "slo_035_pass_rate" in df_sum.columns
+    assert "slo_035_met_all_runs" in df_sum.columns
+
+    df_paired = compute_paired_comparisons(df_runs)
+    assert len(df_paired) > 0
+    assert {
+        "mean_paired_diff",
+        "std_paired_diff",
+        "ci95_low",
+        "ci95_high",
+        "rel_diff_pct",
+        "ci95_includes_zero",
+    }.issubset(set(df_paired.columns))
 
