@@ -361,17 +361,19 @@ class MetricsCollector:
 
         avg_pt = float(np.mean(pts)) if len(pts) > 0 else 0.0
 
+        # Arrival-window throughput: requests completed within [0, simulation_duration] / simulation_duration
         arrival_window_tput = (
             completed_in_window_n / self.config.simulation_duration
             if self.config.simulation_duration > 0.0
             else 0.0
         )
+        # End-to-end completion rate: all completed requests / total_elapsed_s (including drain phase)
         end_to_end_rate = (
             completed_n / total_elapsed
             if total_elapsed > 0.0
             else 0.0
         )
-        throughput = arrival_window_tput
+        throughput = end_to_end_rate
 
         avg_q = self.queue.time_weighted_average(total_duration=total_elapsed)
         avg_util = (
