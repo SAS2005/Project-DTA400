@@ -112,3 +112,54 @@ def test_hybrid_strategy_follows_vertical_then_horizontal_progression() -> None:
     assert events[1].active_servers_after == 2
 
 
+def test_static_baseline_instance_counts_and_capacities() -> None:
+    """Static baselines must initialize the exact expected server count and per-server capacity."""
+    profile = (TrafficSegment(0.0, 60.0, 2.0, "Light"),)
+    workload = generate_workload(traffic_profile=profile, seed=42)
+
+    expected = [
+        ("static_1", 1, 1.0, 1.0),
+        ("static_2", 1, 2.0, 2.0),
+        ("static_4", 1, 4.0, 4.0),
+        ("static_vertical_2", 1, 2.0, 2.0),
+        ("static_vertical_4", 1, 4.0, 4.0),
+        ("static_horizontal_2", 2, 1.0, 2.0),
+        ("static_horizontal_4", 4, 1.0, 4.0),
+    ]
+    for strat, exp_servers, exp_per_srv_cap, exp_total_cap in expected:
+        cfg = SimulationConfig(
+            strategy=strat,
+            traffic_profile=profile,
+            simulation_duration=60.0,
+            random_seed=42,
+        )
+        res = run_simulation(cfg, pregenerated_requests=workload)
+        active_srvs = res.metrics.pool.strictly_active_servers
+        assert len(active_srvs) == exp_servers
+        assert all(s.capacity == pytest.approx(exp_per_srv_cap) for s in active_srvs)
+        assert res.metrics.pool.active_capacity == pytest.approx(exp_total_cap)
+        assert res.summary.avg_active_servers == pytest.approx(float(exp_servers), abs=1e-6)
+        assert res.summary.avg_active_capacity == pytest.approx(exp_total_cap, abs=1e-6)
+        assert res.summary.total_scaling_events == 0
+
+    with pytest.raises(ValueError, match="Unknown scaling strategy"):
+        run_simulation(SimulationConfig(strategy="invalid_strategy_name", simulation_duration=10.0))
+
+
+def test_hybrid_adaptive_intermediate_three_unit_state() -> None:
+    """Hybrid-Adaptive must provision an intermediate 3-unit state ([2.0, 1.0]) under moderate high load."""
+    profile = (
+        TrafficSegment(0.0, 60.0, 6.0, "Normal"),
+        TrafficSegment(60.0, 240.0, 12.0, "Moderate High"),
+    )
+    workload = generate_workload(traffic_profile=profile, seed=42)
+    cfg = SimulationConfig(
+        strategy="hybrid_adaptive",
+        traffic_profile=profile,
+        simulation_duration=240.0,
+        random_seed=42,
+    )
+    res = run_simulation(cfg, pregenerated_requests=workload)
+    capacities_seen = {round(pt.active_capacity, 1) for pt in res.metrics.time_series}
+    assert 3.0 in capacities_seen
+

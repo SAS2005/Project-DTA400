@@ -22,9 +22,9 @@ STRATEGY_LABELS: Dict[str, str] = {
     "horizontal": "Horizontal (1..4x1)",
     "hybrid": "Hybrid (1x1->1x2->2x2)",
     "hybrid_adaptive": "Hybrid-Adaptive (Fine)",
-    "static_1": "Static-1 (1 cap)",
-    "static_2": "Static-2 (2 cap)",
-    "static_4": "Static-4 (4 cap)",
+    "static_1": "Static-1 (1x1)",
+    "static_2": "Static-2 (1x2)",
+    "static_4": "Static-4 (1x4)",
 }
 
 STRATEGY_COLORS: Dict[str, str] = {

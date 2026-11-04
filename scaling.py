@@ -441,15 +441,30 @@ class Autoscaler:
 
 
 def _initial_pool_params(config: SimulationConfig) -> tuple[int, float]:
-    """Determine (initial_servers, initial_capacity_per_server) for the chosen strategy."""
+    """Determine (initial_servers, initial_capacity_per_server) for the chosen strategy.
+
+    Static baseline definitions:
+    - 'static_1' / 'static_vertical_1' / 'static_horizontal_1': 1 server x 1.0 unit (total 1.0)
+    - 'static_2' / 'static_vertical_2': 1 server x 2.0 units (total 2.0, single-instance vertical baseline)
+    - 'static_4' / 'static_vertical_4': 1 server x 4.0 units (total 4.0, single-instance vertical baseline)
+    - 'static_horizontal_2' / 'static_2_horizontal': 2 servers x 1.0 unit (total 2.0, multi-instance baseline)
+    - 'static_horizontal_4' / 'static_4_horizontal': 4 servers x 1.0 unit (total 4.0, multi-instance baseline)
+    - Dynamic strategies ('vertical', 'horizontal', 'hybrid', 'hybrid_adaptive'): start at 1 server x 1.0 unit
+    """
     strat = config.strategy.lower()
-    if strat == "static_1":
+    if strat in ("static_1", "static_vertical_1", "static_horizontal_1"):
         return 1, 1.0
-    if strat == "static_2":
+    if strat in ("static_2", "static_vertical_2"):
         return 1, 2.0
-    if strat == "static_4":
+    if strat in ("static_4", "static_vertical_4"):
         return 1, 4.0
-    return 1, 1.0
+    if strat in ("static_horizontal_2", "static_2_horizontal"):
+        return 2, 1.0
+    if strat in ("static_horizontal_4", "static_4_horizontal"):
+        return 4, 1.0
+    if strat in ("vertical", "horizontal", "hybrid", "hybrid_adaptive"):
+        return 1, 1.0
+    raise ValueError(f"Unknown scaling strategy: {config.strategy!r}")
 
 
 def run_simulation(
