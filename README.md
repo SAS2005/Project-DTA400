@@ -257,7 +257,7 @@ Project-DTA400/
 ├── tests/                   # 27 automated unit and integration tests
 ├── results/                 # Verified CSV datasets from Experiments 1–5 (N=10 seeds)
 ├── figures/                 # 10 publication-quality figures (300 DPI PNG)
-└── report/                  # IEEE conference paper (.md, .docx, .pdf), outline, and presentation guide
+
 ```
 
 ---
